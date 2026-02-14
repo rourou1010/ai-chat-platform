@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对话平台 - 商业化版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 登录/注册页面 */
+        .auth-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .auth-container h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .auth-container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .auth-tab {
+            padding: 12px 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-form {
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #357ABD;
+        }
+
+        /* 主界面 */
+        .main-container {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .main-container.active {
+            display: flex;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-balance {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .user-balance span {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f5f5f5;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .model-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .model-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .model-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .model-item.active {
+            border-color: #4A90E2;
+            background: #e8f4fd;
+        }
+
+        .model-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .model-item-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .model-item-cost {
+            font-size: 12px;
+            color: #666;
+            background: #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .model-item-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .recharge-section {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .recharge-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .recharge-packages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .recharge-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .recharge-item:hover {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .recharge-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recharge-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .recharge-item-price {
+            font-weight: 600;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+
+        .recharge-item-desc {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #4A90E2;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-box textarea {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            resize: none;
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .input-box textarea:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+
+        .send-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #357ABD;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: flex;
+            gap: 5px;
+            padding: 8px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: #4A90E2;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .welcome p {
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .welcome .emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .alert {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 认证页面 -->
+        <div class="auth-container" id="auth-container">
+            <h1>🤖 AI对话平台</h1>
+            <p>10大模型，一键切换</p>
+            
+            <div class="alert" id="auth-alert"></div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+            </div>
+
+            <div class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="login-phone" placeholder="请输入手机号">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                </div>
+                <button class="btn-primary" onclick="login()">登录</button>
+            </div>
+
+            <div class="auth-form" id="register-form" style="display: none;">
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="register-phone" placeholder="请输入手机号">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="register-password" placeholder="请输入密码（至少6位）">
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="register-confirm" placeholder="请再次输入密码">
+                </div>
+                <button class="btn-primary" onclick="register()">注册</button>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 12px; color: #999;">
+                新用户注册送10次免费额度
+            </p>
+        </div>
+
+        <!-- 主界面 -->
+        <div class="main-container" id="main-container">
+            <div class="header">
+                <h1>
+                    <span>🤖</span>
+                    AI对话平台
+                    <span class="badge">商业化版</span>
+                </h1>
+                <div class="user-info">
+                    <div class="user-balance">
+                        余额: <span id="user-balance">0</span> 次
+                    </div>
+                    <button class="btn-logout" onclick="logout()">退出</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="sidebar">
+                    <h3>选择模型</h3>
+                    <div class="model-list" id="model-list"></div>
+
+                    <div class="recharge-section">
+                        <h3>💰 充值套餐</h3>
+                        <div class="recharge-packages">
+                            <div class="recharge-item" onclick="recharge(9.9, 10)">
+                                <div class="recharge-item-header">
+                                    <span class="recharge-item-name">基础版</span>
+                                    <span class="recharge-item-price">¥9.9</span>
+                                </div>
+                                <div class="recharge-item-desc">10次对话</div>
+                            </div>
+                            <div class="recharge-item" onclick="recharge(49.9, 100)">
+                                <div class="recharge-item-header">
+                                    <span class="recharge-item-name">标准版</span>
+                                    <span class="recharge-item-price">¥49.9</span>
+                                </div>
+                                <div class="recharge-item-desc">100次对话</div>
+                            </div>
+                            <div class="recharge-item" onclick="recharge(199, 1000)">
+                                <div class="recharge-item-header">
+                                    <span class="recharge-item-name">专业版</span>
+                                    <span class="recharge-item-price">¥199</span>
+                                </div>
+                                <div class="recharge-item-desc">1000次对话</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-section">
+                    <div class="chat-container" id="chat-container">
+                        <div class="welcome">
+                            <span class="emoji">👋</span>
+                            <h2>欢迎使用AI对话平台</h2>
+                            <p>选择左侧的AI模型，开始对话吧！</p>
+                            <p style="margin-top: 20px;">💡 新用户注册送10次免费额度</p>
+                        </div>
+                    </div>
+                    <div class="input-container">
+                        <div class="input-box">
+                            <textarea 
+                                id="message-input" 
+                                placeholder="输入你的消息..." 
+                                rows="1"
+                                onkeydown="handleKeyDown(event)"
+                                oninput="autoResize(this)"
+                            ></textarea>
+                            <button class="send-btn" id="send-btn" onclick="sendMessage()">发送</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AI模型配置
+        const AI_MODELS = {
+            deepseek: {
+                name: 'DeepSeek',
+                icon: '🔷',
+                desc: '性价比之王',
+                url: 'https://api.deepseek.com/v1/chat/completions',
+                model: 'deepseek-chat',
+                costPerCall: 1
+            },
+            openai: {
+                name: 'OpenAI (GPT)',
+                icon: '🧠',
+                desc: '最强大模型',
+                url: 'https://api.openai.com/v1/chat/completions',
+                model: 'gpt-3.5-turbo',
+                costPerCall: 2
+            },
+            zhipu: {
+                name: '智谱AI (GLM-4)',
+                icon: '🧬',
+                desc: '中文强大',
+                url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+                model: 'glm-4',
+                costPerCall: 1
+            },
+            qwen: {
+                name: '通义千问',
+                icon: '💬',
+                desc: '阿里出品',
+                url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+                model: 'qwen-turbo',
+                costPerCall: 1
+            },
+            ernie: {
+                name: '文心一言',
+                icon: '🔹',
+                desc: '百度AI',
+                url: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions',
+                model: 'ernie-bot-turbo',
+                costPerCall: 1
+            },
+            doubao: {
+                name: '豆包',
+                icon: '🐙',
+                desc: '字节跳动',
+                url: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+                model: 'ep-2024-10-30',
+                costPerCall: 1
+            },
+            kimi: {
+                name: 'Kimi',
+                icon: '🌙',
+                desc: '长文本专家',
+                url: 'https://api.moonshot.cn/v1/chat/completions',
+                model: 'moonshot-v1-8k',
+                costPerCall: 1
+            },
+            claude: {
+                name: 'Claude',
+                icon: '🎭',
+                desc: 'Anthropic出品',
+                url: 'https://api.anthropic.com/v1/messages',
+                model: 'claude-3-haiku-20240307',
+                costPerCall: 2,
+                isClaude: true
+            },
+            hunyuan: {
+                name: '腾讯混元',
+                icon: '☁️',
+                desc: '腾讯出品',
+                url: 'https://hunyuan.tencentcloudapi.com/',
+                model: 'hunyuan-lite',
+                costPerCall: 1
+            },
+            xunfei: {
+                name: '讯飞星火',
+                icon: '✨',
+                desc: '科大讯飞',
+                url: 'https://spark-api.xf-yun.com/v4.0/chat',
+                model: 'spark-lite',
+                costPerCall: 1
+            }
+        };
+
+        // API密钥配置（需要你填入）
+        const API_KEYS = {
+            deepseek: 'sk-d24d8a7cb3624bc8940e73e989f4ef0d',  // ← 在这里填入你的API密钥
+            openai: '你的OpenAI API密钥',
+            zhipu: '你的智谱API密钥',
+            qwen: '你的通义千问API密钥',
+            ernie: '你的文心API密钥',
+            doubao: '你的豆包API密钥',
+            kimi: '你的Kimi API密钥',
+            claude: '你的Claude API密钥',
+            hunyuan: '你的混元API密钥',
+            xunfei: '你的讯飞API密钥'
+        };
+
+        // 全局状态
+        let currentUser = null;
+        let currentModel = 'deepseek';
+        let messageHistory = [];
+
+        // 初始化
+        function init() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainInterface();
+            }
+
+            renderModels();
+        }
+
+        // 渲染模型列表
+        function renderModels() {
+            const container = document.getElementById('model-list');
+            container.innerHTML = '';
+
+            Object.entries(AI_MODELS).forEach(([key, model]) => {
+                const div = document.createElement('div');
+                div.className = `model-item ${key === currentModel ? 'active' : ''}`;
+                div.onclick = () => selectModel(key);
+                div.innerHTML = `
+                    <div class="model-item-header">
+                        <span class="model-item-name">${model.icon} ${model.name}</span>
+                        <span class="model-item-cost">${model.costPerCall}次</span>
+                    </div>
+                    <div class="model-item-desc">${model.desc}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 选择模型
+        function selectModel(modelKey) {
+            currentModel = modelKey;
+            renderModels();
+        }
+
+        // 切换认证标签
+        function switchAuthTab(tab) {
+            const tabs = document.querySelectorAll('.auth-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'login') {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'none';
+            } else {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            }
+        }
+
+        // 显示提示
+        function showAlert(message) {
+            const alert = document.getElementById('auth-alert');
+            alert.textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+
+        // 注册
+        function register() {
+            const phone = document.getElementById('register-phone').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+
+            if (!phone || !password) {
+                showAlert('请填写完整信息');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('密码至少6位');
+                return;
+            }
+
+            if (password !== confirm) {
+                showAlert('两次密码不一致');
+                return;
+            }
+
+            // 获取所有用户
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (users[phone]) {
+                showAlert('该手机号已注册');
+                return;
+            }
+
+            // 创建用户
+            users[phone] = {
+                phone,
+                password,
+                balance: 10, // 送10次免费
+                totalUses: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('users', JSON.stringify(users));
+
+            showAlert('注册成功，赠送10次免费额度！');
+
+            // 清空表单
+            document.getElementById('register-phone').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('register-confirm').value = '';
+
+            // 切换到登录
+            switchAuthTab('login');
+        }
+
+        // 登录
+        function login() {
+            const phone = document.getElementById('login-phone').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!phone || !password) {
+                showAlert('请填写完整信息');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (!users[phone] || users[phone].password !== password) {
+                showAlert('手机号或密码错误');
+                return;
+            }
+
+            currentUser = users[phone];
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            showMainInterface();
+        }
+
+        // 退出登录
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            messageHistory = [];
+
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('main-container').classList.remove('active');
+        }
+
+        // 显示主界面
+        function showMainInterface() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('main-container').classList.add('active');
+            updateUserInfo();
+            loadChatHistory();
+        }
+
+        // 更新用户信息
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('user-balance').textContent = currentUser.balance;
+            }
+        }
+
+        // 充值
+        function recharge(amount, times) {
+            if (!confirm(`确认充值 ${times} 次额度，价格 ¥${amount}？`)) {
+                return;
+            }
+
+            currentUser.balance += times;
+
+            // 更新用户数据
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            users[currentUser.phone] = currentUser;
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            updateUserInfo();
+            alert(`充值成功！获得 ${times} 次额度`);
+        }
+
+        // 自动调整文本框高度
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // 处理键盘事件
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // 检查余额
+            if (currentUser.balance < AI_MODELS[currentModel].costPerCall) {
+                alert('余额不足，请充值！');
+                return;
+            }
+
+            // 检查API密钥
+            const apiKey = API_KEYS[currentModel];
+            if (!apiKey || apiKey.includes('你的')) {
+                alert(`${AI_MODELS[currentModel].name} API密钥未配置`);
+                return;
+            }
+
+            // 添加用户消息
+            addMessage('user', message);
+            input.value = '';
+            autoResize(input);
+
+            // 显示加载动画
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message ai';
+            loadingDiv.innerHTML = '<div class="message-content loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+            document.getElementById('chat-container').appendChild(loadingDiv);
+            scrollToBottom();
+
+            try {
+                const modelConfig = AI_MODELS[currentModel];
+                let aiResponse;
+
+                if (currentModel === 'claude') {
+                    const response = await fetch(modelConfig.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01'
+                        },
+                        body: JSON.stringify({
+                            model: modelConfig.model,
+                            max_tokens: 1024,
+                            messages: messageHistory
+                        })
+                    });
+
+                    const data = await response.json();
+                    aiResponse = data.content[0].text;
+                } else {
+                    const response = await fetch(modelConfig.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: modelConfig.model,
+                            messages: messageHistory,
+                            temperature: 0.7
+                        })
+                    });
+
+                    const data = await response.json();
+                    aiResponse = data.choices[0].message.content;
+                }
+
+                // 移除加载动画
+                loadingDiv.remove();
+
+                // 添加AI回复
+                addMessage('ai', aiResponse);
+
+                // 扣除余额
+                currentUser.balance -= modelConfig.costPerCall;
+                currentUser.totalUses++;
+
+                // 更新用户数据
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                users[currentUser.phone] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                updateUserInfo();
+
+            } catch (error) {
+                loadingDiv.remove();
+                addMessage('ai', `❌ 错误: ${error.message}\n\n请检查API密钥是否正确`);
+            }
+        }
+
+        // 添加消息
+        function addMessage(role, content) {
+            messageHistory.push({
+                role: role === 'user' ? 'user' : 'assistant',
+                content
+            });
+            renderMessages();
+            saveChatHistory();
+        }
+
+        // 渲染消息
+        function renderMessages() {
+            const container = document.getElementById('chat-container');
+
+            if (messageHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="welcome">
+                        <span class="emoji">👋</span>
+                        <h2>欢迎使用AI对话平台</h2>
+                        <p>选择左侧的AI模型，开始对话吧！</p>
+                        <p style="margin-top: 20px;">💡 新用户注册送10次免费额度</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            messageHistory.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.role === 'user' ? 'user' : 'ai'}`;
+                messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+                container.appendChild(messageDiv);
+            });
+
+            scrollToBottom();
+        }
+
+        // 保存聊天记录
+        function saveChatHistory() {
+            if (currentUser) {
+                const allHistory = JSON.parse(localStorage.getItem('chatHistory') || '{}');
+                allHistory[currentUser.phone] = messageHistory;
+                localStorage.setItem('chatHistory', JSON.stringify(allHistory));
+            }
+        }
+
+        // 加载聊天记录
+        function loadChatHistory() {
+            if (currentUser) {
+                const allHistory = JSON.parse(localStorage.getItem('chatHistory') || '{}');
+                messageHistory = allHistory[currentUser.phone] || [];
+                renderMessages();
+            }
+        }
+
+        // 转义HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 滚动到底部
+        function scrollToBottom() {
+            const container = document.getElementById('chat-container');
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        // 页面加载时初始化
+        init();
+    </script>
+</body>
+</html>
